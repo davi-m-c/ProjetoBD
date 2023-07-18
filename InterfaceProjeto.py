@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 import mysql.connector
 from PIL import ImageTk, Image
+import io
 
 imagem = Image.open("./img/logoUnb.png")
 imagem = imagem.resize((150, 90))
@@ -482,8 +483,290 @@ def criar_denuncia():
         # Execução do loop principal da janela de denúncia
         janela_denuncia.mainloop()
 
+def exibir_view_relacionamento():
+    try:
+        # Estabelecer conexão com o banco de dados
+        conexao = mysql.connector.connect(
+            host='localhost',     # endereço do servidor MySQL
+            database='projeto',   # nome do banco de dados
+            user='root',          # nome de usuário do MySQL
+            password='root'       # senha do usuário do MySQL
+        )
+
+        # Criar um objeto cursor para executar consultas SQL
+        cursor = conexao.cursor()
+
+        # Consulta para obter os dados da View
+        consulta_view = "SELECT * FROM view_relacionamento"
+        cursor.execute(consulta_view)
+        resultados_view = cursor.fetchall()
+
+        # Fechar o cursor e a conexão
+        cursor.close()
+        conexao.close()
+
+        # Criar uma janela para exibir os dados
+        janela = tk.Tk()
+        janela.title("View de Relacionamento")
+
+        # Criação do Treeview para exibir os dados
+        treeview = ttk.Treeview(janela, columns=("Nome do Professor", "Nome da Disciplina", "Média da Nota"))
+        treeview.heading("#0", text="")
+        treeview.heading("Nome do Professor", text="Nome do Professor")
+        treeview.heading("Nome da Disciplina", text="Nome da Disciplina")
+        treeview.heading("Média da Nota", text="Média da Nota")
+        treeview.column("#0", width=1)
+        treeview.column("Nome do Professor", width=200)
+        treeview.column("Nome da Disciplina", width=200)
+        treeview.column("Média da Nota", width=100)
+
+        # Adicionar os dados ao Treeview
+        for row in resultados_view:
+            nome_professor = row[0]
+            nome_disciplina = row[1]
+            media_nota = row[2]
+            treeview.insert('', 'end', values=(nome_professor, nome_disciplina, media_nota))
+
+        treeview.pack()
+
+        # Execução do loop principal da janela
+        janela.mainloop()
+
+    except mysql.connector.Error as erro:
+        print("Erro ao conectar ao MySQL:", erro)
+
+def adicionar_departamento():
+    nome = entry_nome.get()
+
+    if nome:
+        try:
+            # Estabelecer conexão com o banco de dados
+            conexao = mysql.connector.connect(
+                host='localhost',     # endereço do servidor MySQL
+                database='projeto',     # nome do banco de dados
+                user='root',    # nome de usuário do MySQL
+                password='root'   # senha do usuário do MySQL
+            )
+
+            # Criar um objeto cursor para executar consultas SQL
+            cursor = conexao.cursor()
+
+            # Inserir o departamento no banco de dados
+            inserir_departamento = "INSERT INTO departamentos (nome) VALUES (%s)"
+            valores_departamento = (nome,)
+            cursor.execute(inserir_departamento, valores_departamento)
+            conexao.commit()
+
+            messagebox.showinfo("Sucesso", "Departamento adicionado com sucesso!")
+
+            # Limpar o campo de entrada
+            entry_nome.delete(0, tk.END)
+
+        except mysql.connector.Error as erro:
+            messagebox.showerror("Erro", "Erro ao adicionar departamento: " + str(erro))
+
+        finally:
+            # Fechar o cursor e a conexão
+            cursor.close()
+            conexao.close()
+    else:
+        messagebox.showerror("Erro", "Por favor, insira um nome para o departamento.")
+
+# Função para exibir os departamentos
+def exibir_departamentos():
+    try:
+        # Estabelecer conexão com o banco de dados
+        conexao = mysql.connector.connect(
+            host='localhost',     # endereço do servidor MySQL
+            database='projeto',     # nome do banco de dados
+            user='root',    # nome de usuário do MySQL
+            password='root'   # senha do usuário do MySQL
+        )
+
+        # Criar um objeto cursor para executar consultas SQL
+        cursor = conexao.cursor()
+
+        # Consulta para obter todos os departamentos
+        consulta_departamentos = "SELECT * FROM departamentos"
+        cursor.execute(consulta_departamentos)
+        resultados_departamentos = cursor.fetchall()
+
+        # Exibir os departamentos na janela
+        text_departamentos.delete("1.0", tk.END)
+        for departamento in resultados_departamentos:
+            text_departamentos.insert(tk.END, f"ID: {departamento[0]}, Nome: {departamento[1]}\n")
+
+    except mysql.connector.Error as erro:
+        messagebox.showerror("Erro", "Erro ao conectar ao MySQL: " + str(erro))
+
+    finally:
+        # Fechar o cursor e a conexão
+        cursor.close()
+        conexao.close()
+
+# Função para excluir um departamento
+def excluir_departamento():
+    id_departamento = entry_id.get()
+
+    if id_departamento:
+        try:
+            # Estabelecer conexão com o banco de dados
+            conexao = mysql.connector.connect(
+                host='localhost',     # endereço do servidor MySQL
+                database='projeto',     # nome do banco de dados
+                user='root',    # nome de usuário do MySQL
+                password='root'   # senha do usuário do MySQL
+            )
+
+            # Criar um objeto cursor para executar consultas SQL
+            cursor = conexao.cursor()
+
+            # Excluir o departamento do banco de dados
+            excluir_departamento = "DELETE FROM departamentos WHERE iddepartamentos = %s"
+            valor_exclusao = (id_departamento,)
+            cursor.execute(excluir_departamento, valor_exclusao)
+            conexao.commit()
+
+            messagebox.showinfo("Sucesso", "Departamento excluído com sucesso!")
+
+            # Limpar o campo de entrada
+            entry_id.delete(0, tk.END)
+
+        except mysql.connector.Error as erro:
+            messagebox.showerror("Erro", "Erro ao excluir departamento: " + str(erro))
+
+        finally:
+            # Fechar o cursor e a conexão
+            cursor.close()
+            conexao.close()
+    else:
+        messagebox.showerror("Erro", "Por favor, insira um ID de departamento.")
+
+def exibir_professores():
+    try:
+        # Estabelecer conexão com o banco de dados
+        conexao = mysql.connector.connect(
+            host='localhost',     # endereço do servidor MySQL
+            database='projeto',     # nome do banco de dados
+            user='root',    # nome de usuário do MySQL
+            password='root'   # senha do usuário do MySQL
+        )
+
+        # Criar um objeto cursor para executar consultas SQL
+        cursor = conexao.cursor()
+
+        # Consulta para obter os dados dos professores
+        consulta_professores = "SELECT * FROM professores"
+        cursor.execute(consulta_professores)
+        resultados_professores = cursor.fetchall()
+
+        # Limpar a árvore antes de exibir os professores
+        treeview_professores.delete(*treeview_professores.get_children())
+
+        # Exibir os professores na árvore
+        for professor in resultados_professores:
+            id_professor = professor[0]
+            nome_professor = professor[1]
+            departamento_id = professor[2]
+
+            # Adicionar o professor à árvore
+            treeview_professores.insert('', 'end', values=(id_professor, nome_professor, departamento_id))
+
+        # Fechar o cursor e a conexão
+        cursor.close()
+        conexao.close()
+
+    except mysql.connector.Error as erro:
+        print("Erro ao conectar ao MySQL:", erro)
+
+# Função para adicionar um novo professor
+# Função para adicionar um novo professor
+def adicionar_professor():
+    nome = entry_nomep.get()
+    departamento_id = entry_departamento_id.get()
+
+    try:
+        # Estabelecer conexão com o banco de dados
+        conexao = mysql.connector.connect(
+            host='localhost',     # endereço do servidor MySQL
+            database='projeto',     # nome do banco de dados
+            user='root',    # nome de usuário do MySQL
+            password='root'   # senha do usuário do MySQL
+        )
+
+        # Criar um objeto cursor para executar consultas SQL
+        cursor = conexao.cursor()
+
+        # Inserir o novo professor na tabela
+        inserir_professor = "INSERT INTO professores (name, departamento_id) VALUES (%s, %s)"
+        valores_professor = (nome, departamento_id)
+        cursor.execute(inserir_professor, valores_professor)
+        conexao.commit()
+
+        # Exibir mensagem de sucesso
+        mensagem_status.configure(text="Professor adicionado com sucesso", foreground="green")
+
+        # Limpar os campos de entrada
+        entry_nome.delete(0, tk.END)
+        entry_departamento_id.delete(0, tk.END)
+
+        # Atualizar a exibição dos professores
+        exibir_professores()
+
+        # Fechar o cursor e a conexão
+        cursor.close()
+        conexao.close()
+
+    except mysql.connector.Error as erro:
+        print("Erro ao conectar ao MySQL:", erro)
+        # Exibir mensagem de erro
+        mensagem_status.configure(text="Erro ao adicionar professor", foreground="red")
+
+
+# Função para excluir um professor
+# Função para excluir um professor
+def excluir_professor():
+    item_selecionado = treeview_professores.focus()
+    if item_selecionado:
+        professor_id = treeview_professores.item(item_selecionado)['values'][0]
+
+        try:
+            # Estabelecer conexão com o banco de dados
+            conexao = mysql.connector.connect(
+                host='localhost',     # endereço do servidor MySQL
+                database='projeto',     # nome do banco de dados
+                user='root',    # nome de usuário do MySQL
+                password='root'   # senha do usuário do MySQL
+            )
+
+            # Criar um objeto cursor para executar consultas SQL
+            cursor = conexao.cursor()
+
+            # Excluir o professor da tabela
+            excluir_professor = "DELETE FROM professores WHERE idprofessores = %s"
+            cursor.execute(excluir_professor, (professor_id,))
+            conexao.commit()
+
+            # Exibir mensagem de sucesso
+            mensagem_status.configure(text="Professor excluído com sucesso", foreground="green")
+
+            # Atualizar a exibição dos professores
+            exibir_professores()
+
+            # Fechar o cursor e a conexão
+            cursor.close()
+            conexao.close()
+
+        except mysql.connector.Error as erro:
+            print("Erro ao conectar ao MySQL:", erro)
+            # Exibir mensagem de erro
+            mensagem_status.configure(text="Erro ao excluir professor", foreground="red")
+    else:
+        # Exibir mensagem de erro se nenhum professor estiver selecionado
+        mensagem_status.configure(text="Nenhum professor selecionado", foreground="red")
+
 def exibir_pagina_principal():
-    global entry_email, entry_nota, entry_comentario, entry_turma_id, entry_professorId, texto_avaliacoes, entry_usuario_id, texto_avaliacoes_usuario, treeview_turmas, treeview_avaliacoes
+    global entry_email, entry_nota, entry_comentario, entry_turma_id, entry_professorId, texto_avaliacoes, entry_usuario_id, texto_avaliacoes_usuario, treeview_turmas, treeview_avaliacoes, text_departamentos, treeview_professores, entry_departamento_id, mensagem_status, entry_nomep
     # Criar uma nova janela para a página principal
     janela_principal =  tk.Toplevel()
     janela_principal.title("Criar Avaliação")
@@ -546,8 +829,7 @@ def exibir_pagina_principal():
     entry_usuario_id.pack()
 
     # Botão para mostrar as avaliações do usuário
-    botao_mostrar_avaliacoes_usuario = ttk.Button(aba_avaliacoes_usuario, text="Mostrar Avaliações",
-                                                  command=mostrar_avaliacoes_usuario)
+    botao_mostrar_avaliacoes_usuario = ttk.Button(aba_avaliacoes_usuario, text="Mostrar Avaliações",command=mostrar_avaliacoes_usuario)
     botao_mostrar_avaliacoes_usuario.pack()
 
     # Caixa de texto para exibir as avaliações do usuário
@@ -598,15 +880,141 @@ def exibir_pagina_principal():
     abas.add(aba_turmas, text="Avaliacoes Turmas")
     abas.pack()
 
+    aba_view = ttk.Frame(abas)
+    # Criação do Treeview para exibir os professores
+    treeview_professores = ttk.Treeview(aba_view, columns=("ID", "Nome", "Departamento ID"))
+    treeview_professores.heading("#0", text="")
+    treeview_professores.heading("ID", text="ID")
+    treeview_professores.heading("Nome", text="Nome")
+    treeview_professores.heading("Departamento ID", text="Departamento ID")
+    treeview_professores.column("#0", width=1)
+    treeview_professores.column("ID", width=50)
+    treeview_professores.column("Nome", width=200)
+    treeview_professores.column("Departamento ID", width=100)
+    treeview_professores.pack()
+
+    # Criação do frame para os campos de entrada
+    frame_campos = ttk.Frame(aba_view)
+    frame_campos.pack(pady=10)
+
+    # Criação dos rótulos e campos de entrada
+    label_nome = ttk.Label(frame_campos, text="Nome:")
+    label_nome.grid(row=0, column=0, sticky=tk.E, padx=5, pady=5)
+    entry_nomep = ttk.Entry(frame_campos)
+    entry_nomep.grid(row=0, column=1, padx=5, pady=5)
+
+    label_departamento_id = ttk.Label(frame_campos, text="Departamento ID:")
+    label_departamento_id.grid(row=1, column=0, sticky=tk.E, padx=5, pady=5)
+    entry_departamento_id = ttk.Entry(frame_campos)
+    entry_departamento_id.grid(row=1, column=1, padx=5, pady=5)
+
+    # Criação dos botões
+    frame_botoes = ttk.Frame(aba_view)
+    frame_botoes.pack(pady=10)
+
+    botao_adicionar = ttk.Button(frame_botoes, text="Adicionar", command=adicionar_professor)
+    botao_adicionar.grid(row=0, column=0, padx=5, pady=5)
+
+    botao_excluir = ttk.Button(frame_botoes, text="Excluir", command=excluir_professor)
+    botao_excluir.grid(row=0, column=1, padx=5, pady=5)
+
+    # Criação da mensagem de status
+    mensagem_status = ttk.Label(aba_view, text="")
+    mensagem_status.pack()
+    
+    exibir_professores()
+
+    botao_registro = ttk.Button(aba_view, text="Ver medias", command=exibir_view_relacionamento)
+    botao_registro.pack()
+    abas.add(aba_view, text="Professores")
+    abas.pack()
+
+    aba_departamentos = ttk.Frame(abas)
+    label_nome = tk.Label(aba_departamentos, text="Nome do Departamento:")
+    label_nome.pack()
+
+    entry_nome = tk.Entry(aba_departamentos)
+    entry_nome.pack()
+
+    button_adicionar = tk.Button(aba_departamentos, text="Adicionar", command=adicionar_departamento)
+    button_adicionar.pack()
+
+    label_departamentos = tk.Label(aba_departamentos, text="Departamentos:")
+    label_departamentos.pack()
+
+    text_departamentos = tk.Text(aba_departamentos, width=40, height=10)
+    text_departamentos.pack()
+
+    button_exibir = tk.Button(aba_departamentos, text="Exibir Departamentos", command=exibir_departamentos)
+    button_exibir.pack()
+
+    label_id = tk.Label(aba_departamentos, text="ID do Departamento:")
+    label_id.pack()
+
+    entry_id = tk.Entry(aba_departamentos)
+    entry_id.pack()
+
+    button_excluir = tk.Button(aba_departamentos, text="Excluir", command=excluir_departamento)
+    button_excluir.pack()
+    abas.add(aba_departamentos, text="Departamentos")
+    abas.pack()
+
     janela_principal.mainloop()
+
+def recuperar_imagem(id_imagem):
+    try:
+        # Estabelecer conexão com o banco de dados
+        conexao = mysql.connector.connect(
+            host='localhost',     # endereço do servidor MySQL
+            database='projeto',   # nome do banco de dados
+            user='root',          # nome de usuário do MySQL
+            password='root'       # senha do usuário do MySQL
+        )
+
+        # Criar um objeto cursor para executar consultas SQL
+        cursor = conexao.cursor()
+
+        # Consulta para recuperar a imagem pelo ID
+        consulta_imagem = "SELECT arquivo FROM imagem WHERE id = %s"
+        cursor.execute(consulta_imagem, (id_imagem,))
+        resultado = cursor.fetchone()
+
+        if resultado is not None:
+            # Recuperar o blob da coluna "arquivo"
+            blob_imagem = resultado[0]
+
+            # Carregar o blob em um objeto de imagem usando a biblioteca Pillow
+            imagem = Image.open(io.BytesIO(blob_imagem))
+            return imagem
+
+    except mysql.connector.Error as erro:
+        print("Erro ao conectar ao MySQL:", erro)
+
+    finally:
+        # Fechar o cursor e a conexão
+        cursor.close()
+        conexao.close()
+
+    return None
 
 # Criação da janela principal
 janela = tk.Tk()
 janela.title("Tela de Login e Registro")
 
-imagem_tk = ImageTk.PhotoImage(imagem)
-rotulo = tk.Label(janela, image=imagem_tk)
-rotulo.pack()
+id_imagem = 1  # ID da imagem que você deseja exibir
+imagem = recuperar_imagem(id_imagem)
+
+if imagem is not None:
+    # Redimensionar a imagem para um tamanho máximo de largura e altura de 300 pixels
+    max_width = 200
+    max_height = 200
+    imagem.thumbnail((max_width, max_height))
+
+    # Exibir a imagem em um widget Label
+    img_label = ttk.Label(janela)
+    img_label.image = ImageTk.PhotoImage(imagem)
+    img_label.configure(image=img_label.image)
+    img_label.pack()
 
 # Abas para Login e Registro
 abas = ttk.Notebook(janela)
@@ -652,12 +1060,10 @@ botao_registro.pack()
 
 abas.add(aba_registro, text="Registro")
 
-
-abas.pack()
-
 # Label para exibir o status do login/registro
 label_status = ttk.Label(janela, text="")
 label_status.pack()
+abas.pack()
 
 # Executa o loop principal da janela
 janela.mainloop()
