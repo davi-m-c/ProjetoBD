@@ -536,7 +536,7 @@ def exibir_view_relacionamento():
         print("Erro ao conectar ao MySQL:", erro)
 
 def adicionar_departamento():
-    nome = entry_nome.get()
+    nome = entry_nomed.get()
 
     if nome:
         try:
@@ -766,7 +766,7 @@ def excluir_professor():
         mensagem_status.configure(text="Nenhum professor selecionado", foreground="red")
 
 def exibir_pagina_principal():
-    global entry_email, entry_nota, entry_comentario, entry_turma_id, entry_professorId, texto_avaliacoes, entry_usuario_id, texto_avaliacoes_usuario, treeview_turmas, treeview_avaliacoes, text_departamentos, treeview_professores, entry_departamento_id, mensagem_status, entry_nomep
+    global entry_email, entry_nota, entry_comentario, entry_turma_id, entry_professorId, texto_avaliacoes, entry_usuario_id, texto_avaliacoes_usuario, treeview_turmas, treeview_avaliacoes, text_departamentos, treeview_professores, entry_departamento_id, mensagem_status, entry_nomep, entry_id, entry_nomed
     # Criar uma nova janela para a página principal
     janela_principal =  tk.Toplevel()
     janela_principal.title("Criar Avaliação")
@@ -933,8 +933,8 @@ def exibir_pagina_principal():
     label_nome = tk.Label(aba_departamentos, text="Nome do Departamento:")
     label_nome.pack()
 
-    entry_nome = tk.Entry(aba_departamentos)
-    entry_nome.pack()
+    entry_nomed = tk.Entry(aba_departamentos)
+    entry_nomed.pack()
 
     button_adicionar = tk.Button(aba_departamentos, text="Adicionar", command=adicionar_departamento)
     button_adicionar.pack()
