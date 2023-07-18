@@ -7,9 +7,11 @@ CREATE TABLE `users` (
   `name` varchar(100) NOT NULL,
   `password` varchar(255) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
+  `matricula` varchar(255) DEFAULT NULL,
+  `curso` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`idusers`),
   UNIQUE KEY `unique_email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+) ENGINE=InnoDB AUTO_INCREMENT=112 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 
 # Cria Tabela departamentos
 CREATE TABLE `departamentos` (
@@ -85,3 +87,14 @@ CREATE TABLE `denuncias` (
 CREATE DEFINER=`root`@`localhost` PROCEDURE `new_procedure`(varip int)
 SELECT * FROM avaliacoes 
     WHERE professor_id = varip
+
+# Cria Tabela imagem
+CREATE TABLE imagem (
+    id INT NOT NULL AUTO_INCREMENT,
+    nome VARCHAR(255) ,
+    arquivo LONGBLOB ,
+    PRIMARY KEY (id)
+);
+
+# Cria a view view_relacionamento, que mostra a medias das notas, o nome e a disciplina do professor
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `view_relacionamento` AS select `p`.`name` AS `professor_nome`,`d`.`nome` AS `disciplina_nome`,avg(`a`.`nota`) AS `media_nota` from (((`professores` `p` join `turmas` `t` on((`p`.`idprofessores` = `t`.`professor_id`))) join `disciplinas` `d` on((`t`.`disciplina_id` = `d`.`id`))) join `avaliacoes` `a` on((`t`.`id` = `a`.`turma_id`))) group by `p`.`name`,`d`.`nome`
