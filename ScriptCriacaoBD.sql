@@ -11,14 +11,14 @@ CREATE TABLE `users` (
   `curso` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`idusers`),
   UNIQUE KEY `unique_email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=112 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+) ENGINE=InnoDB AUTO_INCREMENT=112 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 # Cria Tabela departamentos
 CREATE TABLE `departamentos` (
   `iddepartamentos` int NOT NULL,
   `nome` varchar(45) NOT NULL,
   PRIMARY KEY (`iddepartamentos`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 # Cria Tabela disciplinas
 CREATE TABLE `disciplinas` (
@@ -28,7 +28,7 @@ CREATE TABLE `disciplinas` (
   PRIMARY KEY (`id`),
   KEY `departamento_id` (`departamento_id`),
   CONSTRAINT `disciplinas_ibfk_1` FOREIGN KEY (`departamento_id`) REFERENCES `departamentos` (`iddepartamentos`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 # Cria Tabela professores
 CREATE TABLE `professores` (
@@ -38,7 +38,7 @@ CREATE TABLE `professores` (
   PRIMARY KEY (`idprofessores`),
   KEY `departamento_id` (`departamento_id`),
   CONSTRAINT `professores_ibfk_1` FOREIGN KEY (`departamento_id`) REFERENCES `departamentos` (`iddepartamentos`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 # Cria Tabela turmas
 CREATE TABLE `turmas` (
@@ -50,7 +50,7 @@ CREATE TABLE `turmas` (
   KEY `disciplina_id` (`disciplina_id`),
   CONSTRAINT `turmas_ibfk_1` FOREIGN KEY (`professor_id`) REFERENCES `professores` (`idprofessores`),
   CONSTRAINT `turmas_ibfk_2` FOREIGN KEY (`disciplina_id`) REFERENCES `disciplinas` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 # Cria Tabela avaliacoes
 CREATE TABLE `avaliacoes` (
@@ -67,7 +67,7 @@ CREATE TABLE `avaliacoes` (
   CONSTRAINT `fk_avaliacoes_professores` FOREIGN KEY (`professor_id`) REFERENCES `professores` (`idprofessores`),
   CONSTRAINT `fk_avaliacoes_turmas` FOREIGN KEY (`turma_id`) REFERENCES `turmas` (`id`),
   CONSTRAINT `userid` FOREIGN KEY (`userid`) REFERENCES `users` (`idusers`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 # Cria Tabela denuncias
 CREATE TABLE `denuncias` (
@@ -81,12 +81,12 @@ CREATE TABLE `denuncias` (
   KEY `avaliacao_id` (`avaliacao_id`),
   CONSTRAINT `denuncias_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `users` (`idusers`),
   CONSTRAINT `denuncias_ibfk_2` FOREIGN KEY (`avaliacao_id`) REFERENCES `avaliacoes` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 # Cria o procedure new_procedure, que mostra as avaliacoes de um professor  
 CREATE DEFINER=`root`@`localhost` PROCEDURE `new_procedure`(varip int)
 SELECT * FROM avaliacoes 
-    WHERE professor_id = varip
+    WHERE professor_id = varip;
 
 # Cria Tabela imagem
 CREATE TABLE `imagem` (
@@ -94,7 +94,7 @@ CREATE TABLE `imagem` (
   `nome` varchar(255) DEFAULT NULL,
   `arquivo` longblob,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 # Cria a view view_relacionamento, que mostra a medias das notas, o nome e a disciplina do professor
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `view_relacionamento` AS select `p`.`name` AS `professor_nome`,`d`.`nome` AS `disciplina_nome`,avg(`a`.`nota`) AS `media_nota` from (((`professores` `p` join `turmas` `t` on((`p`.`idprofessores` = `t`.`professor_id`))) join `disciplinas` `d` on((`t`.`disciplina_id` = `d`.`id`))) join `avaliacoes` `a` on((`t`.`id` = `a`.`turma_id`))) group by `p`.`name`,`d`.`nome`
